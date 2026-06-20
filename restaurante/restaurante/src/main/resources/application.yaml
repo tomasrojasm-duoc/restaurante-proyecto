@@ -1,0 +1,87 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: diner
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/diners/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: reservation
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/v1/reservations/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: table
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/v1/tables/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: auth-service
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/v1/auth/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: waiter
+              uri: http://localhost:8085
+              predicates:
+                - Path=/api/v1/waiters/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: menu
+              uri: http://localhost:8086
+              predicates:
+                - Path=/api/v1/menu-items/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: order
+              uri: http://localhost:8087
+              predicates:
+                - Path=/api/v1/orders/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: kitchen
+              uri: http://localhost:8088
+              predicates:
+                - Path=/api/v1/kitchen/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: inventory
+              uri: http://localhost:8089
+              predicates:
+                - Path=/api/v1/inventory/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+            - id: notification
+              uri: http://localhost:8090
+              predicates:
+                - Path=/api/v1/notifications/**
+              filters:
+                - AddResponseHeader=X-Gateway, restaurante-gateway
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

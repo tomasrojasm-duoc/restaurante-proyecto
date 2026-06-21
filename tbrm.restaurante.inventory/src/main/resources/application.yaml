@@ -1,10 +1,10 @@
 logging:
   file:
-    name: ${LOG_PATH:logs}/kitchen.log
+    name: ${LOG_PATH:logs}/inventory.log
 
   level:
     root: INFO
-    com.kitchen.tbrm.restaurante.kitchen: DEBUG
+    com.inventory.tbrm.restaurante.inventory: DEBUG
 
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"

@@ -6,14 +6,16 @@ import com.menu.tbrm.restaurante.menu.model.MenuItem;
 import com.menu.tbrm.restaurante.menu.repository.MenuItemRepository;
 import com.menu.tbrm.restaurante.menu.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class MenuItemServiceImpl implements MenuItemService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MenuItemServiceImpl.class);
 
     private final MenuItemRepository repository;
 
@@ -41,82 +43,210 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public List<MenuItemResponseDto> findAll() {
-        return repository.findAll().stream().map(this::toDto).toList();
+        logger.info("Buscando todos los productos del menú");
+
+        List<MenuItemResponseDto> items = repository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Productos del menú encontrados. totalItems={}", items.size());
+
+        return items;
     }
 
     @Override
     public MenuItemResponseDto findById(Long id) {
-        return repository.findById(id).map(this::toDto).orElse(null);
+        logger.info("Buscando producto del menú por id={}", id);
+
+        MenuItemResponseDto response = repository.findById(id)
+                .map(this::toDto)
+                .orElse(null);
+
+        if (response == null) {
+            logger.warn("Producto del menú no encontrado. menuItemId={}", id);
+            return null;
+        }
+
+        logger.info("Producto del menú encontrado. menuItemId={}, name={}, category={}, price={}, status={}",
+                response.getId(),
+                response.getName(),
+                response.getCategory(),
+                response.getPrice(),
+                response.getStatus());
+
+        return response;
     }
 
     @Override
     public MenuItemResponseDto findByName(String name) {
+        logger.info("Buscando producto del menú por nombre={}", name);
+
         MenuItem item = repository.findByName(name);
 
         if (item == null) {
-            log.warn("Menu item not found with name {}", name);
+            logger.warn("Producto del menú no encontrado. name={}", name);
             return null;
         }
+
+        logger.info("Producto del menú encontrado. menuItemId={}, name={}, category={}, price={}, status={}",
+                item.getId(),
+                item.getName(),
+                item.getCategory(),
+                item.getPrice(),
+                item.getStatus());
 
         return toDto(item);
     }
 
     @Override
     public List<MenuItemResponseDto> findByCategory(String category) {
-        return repository.findByCategory(category).stream().map(this::toDto).toList();
+        logger.info("Buscando productos del menú por categoría={}", category);
+
+        List<MenuItemResponseDto> items = repository.findByCategory(category)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Productos encontrados para category={}. totalItems={}", category, items.size());
+
+        return items;
     }
 
     @Override
     public List<MenuItemResponseDto> findByStatus(String status) {
-        return repository.findByStatus(status).stream().map(this::toDto).toList();
+        logger.info("Buscando productos del menú por status={}", status);
+
+        List<MenuItemResponseDto> items = repository.findByStatus(status)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Productos encontrados para status={}. totalItems={}", status, items.size());
+
+        return items;
     }
 
     @Override
     public List<MenuItemResponseDto> findByCategoryAndStatus(String category, String status) {
-        return repository.findByCategoryAndStatus(category, status)
+        logger.info("Buscando productos del menú por category={} y status={}", category, status);
+
+        List<MenuItemResponseDto> items = repository.findByCategoryAndStatus(category, status)
                 .stream()
                 .map(this::toDto)
                 .toList();
+
+        logger.info("Productos encontrados para category={} y status={}. totalItems={}",
+                category,
+                status,
+                items.size());
+
+        return items;
     }
 
     @Override
     public List<MenuItemResponseDto> findByMaxPrice(Integer price) {
-        return repository.findByPriceLessThanEqual(price)
+        logger.info("Buscando productos del menú con precio menor o igual a {}", price);
+
+        List<MenuItemResponseDto> items = repository.findByPriceLessThanEqual(price)
                 .stream()
                 .map(this::toDto)
                 .toList();
+
+        logger.info("Productos encontrados con precio <= {}. totalItems={}", price, items.size());
+
+        return items;
     }
 
     @Override
     public MenuItemResponseDto create(MenuItemRequestDto dto) {
-        if (repository.findByName(dto.getName()) != null) {
-            log.warn("Menu item already exists with name {}", dto.getName());
-            return null;
-        }
+        logger.info("Iniciando creación de producto del menú. name={}, category={}, price={}, status={}",
+                dto.getName(),
+                dto.getCategory(),
+                dto.getPrice(),
+                dto.getStatus());
 
-        return this.toDto(repository.save(toEntity(dto)));
+        try {
+            if (repository.findByName(dto.getName()) != null) {
+                logger.warn("No se pudo crear producto del menú. Ya existe un producto con name={}",
+                        dto.getName());
+                return null;
+            }
+
+            MenuItem savedItem = repository.save(toEntity(dto));
+
+            logger.info("Producto del menú creado correctamente. menuItemId={}, name={}, category={}, price={}, status={}",
+                    savedItem.getId(),
+                    savedItem.getName(),
+                    savedItem.getCategory(),
+                    savedItem.getPrice(),
+                    savedItem.getStatus());
+
+            return toDto(savedItem);
+
+        } catch (Exception ex) {
+            logger.error("Error inesperado al crear producto del menú. name={}. Motivo={}",
+                    dto.getName(),
+                    ex.getMessage(),
+                    ex);
+
+            throw ex;
+        }
     }
 
     @Override
     public MenuItemResponseDto update(MenuItemRequestDto dto) {
-        if (dto.getId() == null) {
-            return null;
-        }
+        logger.info("Iniciando actualización de producto del menú. menuItemId={}, name={}",
+                dto.getId(),
+                dto.getName());
 
-        if (findById(dto.getId()) == null) {
-            return null;
-        }
+        try {
+            if (dto.getId() == null) {
+                logger.warn("No se pudo actualizar producto del menú. El id viene nulo");
+                return null;
+            }
 
-        return this.toDto(repository.save(toEntity(dto)));
+            if (findById(dto.getId()) == null) {
+                logger.warn("No se pudo actualizar producto del menú. Producto no encontrado. menuItemId={}",
+                        dto.getId());
+                return null;
+            }
+
+            MenuItem savedItem = repository.save(toEntity(dto));
+
+            logger.info("Producto del menú actualizado correctamente. menuItemId={}, name={}, category={}, price={}, status={}",
+                    savedItem.getId(),
+                    savedItem.getName(),
+                    savedItem.getCategory(),
+                    savedItem.getPrice(),
+                    savedItem.getStatus());
+
+            return toDto(savedItem);
+
+        } catch (Exception ex) {
+            logger.error("Error inesperado al actualizar producto del menú. menuItemId={}, name={}. Motivo={}",
+                    dto.getId(),
+                    dto.getName(),
+                    ex.getMessage(),
+                    ex);
+
+            throw ex;
+        }
     }
 
     @Override
     public boolean delete(Long id) {
+        logger.info("Intentando eliminar producto del menú. menuItemId={}", id);
+
         if (findById(id) == null) {
+            logger.warn("No se pudo eliminar producto del menú. Producto no encontrado. menuItemId={}", id);
             return false;
         }
 
         repository.deleteById(id);
+
+        logger.info("Producto del menú eliminado correctamente. menuItemId={}", id);
+
         return true;
     }
 }

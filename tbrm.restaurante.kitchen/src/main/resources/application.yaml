@@ -1,0 +1,11 @@
+logging:
+  file:
+    name: ${LOG_PATH:logs}/kitchen-service.log
+
+  level:
+    root: INFO
+    com.kitchen.tbrm.restaurante.kitchen: DEBUG
+
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
+    console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"

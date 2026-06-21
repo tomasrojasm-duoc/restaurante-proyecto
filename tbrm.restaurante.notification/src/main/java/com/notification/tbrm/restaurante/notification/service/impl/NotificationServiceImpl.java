@@ -6,14 +6,16 @@ import com.notification.tbrm.restaurante.notification.model.Notification;
 import com.notification.tbrm.restaurante.notification.repository.NotificationRepository;
 import com.notification.tbrm.restaurante.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class NotificationServiceImpl implements NotificationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
     private final NotificationRepository repository;
 
@@ -41,81 +43,229 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationResponseDto> findAll() {
-        return repository.findAll().stream().map(this::toDto).toList();
+        logger.info("Buscando todas las notificaciones");
+
+        List<NotificationResponseDto> notifications = repository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Notificaciones encontradas. totalNotifications={}", notifications.size());
+
+        return notifications;
     }
 
     @Override
     public NotificationResponseDto findById(Long id) {
-        return repository.findById(id).map(this::toDto).orElse(null);
+        logger.info("Buscando notificación por id={}", id);
+
+        NotificationResponseDto response = repository.findById(id)
+                .map(this::toDto)
+                .orElse(null);
+
+        if (response == null) {
+            logger.warn("Notificación no encontrada. notificationId={}", id);
+            return null;
+        }
+
+        logger.info("Notificación encontrada. notificationId={}, recipient={}, type={}, status={}",
+                response.getId(),
+                response.getRecipient(),
+                response.getType(),
+                response.getStatus());
+
+        return response;
     }
 
     @Override
     public List<NotificationResponseDto> findByRecipient(String recipient) {
-        return repository.findByRecipient(recipient).stream().map(this::toDto).toList();
+        logger.info("Buscando notificaciones por recipient={}", recipient);
+
+        List<NotificationResponseDto> notifications = repository.findByRecipient(recipient)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Notificaciones encontradas para recipient={}. totalNotifications={}",
+                recipient,
+                notifications.size());
+
+        return notifications;
     }
 
     @Override
     public List<NotificationResponseDto> findByType(String type) {
-        return repository.findByType(type).stream().map(this::toDto).toList();
+        logger.info("Buscando notificaciones por type={}", type);
+
+        List<NotificationResponseDto> notifications = repository.findByType(type)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Notificaciones encontradas para type={}. totalNotifications={}",
+                type,
+                notifications.size());
+
+        return notifications;
     }
 
     @Override
     public List<NotificationResponseDto> findByStatus(String status) {
-        return repository.findByStatus(status).stream().map(this::toDto).toList();
+        logger.info("Buscando notificaciones por status={}", status);
+
+        List<NotificationResponseDto> notifications = repository.findByStatus(status)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        logger.info("Notificaciones encontradas para status={}. totalNotifications={}",
+                status,
+                notifications.size());
+
+        return notifications;
     }
 
     @Override
     public List<NotificationResponseDto> findByRecipientAndStatus(String recipient, String status) {
-        return repository.findByRecipientAndStatus(recipient, status)
+        logger.info("Buscando notificaciones por recipient={} y status={}", recipient, status);
+
+        List<NotificationResponseDto> notifications = repository.findByRecipientAndStatus(recipient, status)
                 .stream()
                 .map(this::toDto)
                 .toList();
+
+        logger.info("Notificaciones encontradas para recipient={} y status={}. totalNotifications={}",
+                recipient,
+                status,
+                notifications.size());
+
+        return notifications;
     }
 
     @Override
     public NotificationResponseDto create(NotificationRequestDto dto) {
-        Notification notification = toEntity(dto);
+        logger.info("Iniciando creación de notificación. recipient={}, type={}, status={}",
+                dto.getRecipient(),
+                dto.getType(),
+                dto.getStatus());
 
-        if (notification.getStatus() == null || notification.getStatus().isBlank()) {
-            notification.setStatus("PENDING");
+        try {
+            Notification notification = toEntity(dto);
+
+            if (notification.getStatus() == null || notification.getStatus().isBlank()) {
+                logger.warn("Notificación recibida sin status. Se asignará status=PENDING");
+                notification.setStatus("PENDING");
+            }
+
+            Notification savedNotification = repository.save(notification);
+
+            logger.info("Notificación creada correctamente. notificationId={}, recipient={}, type={}, status={}",
+                    savedNotification.getId(),
+                    savedNotification.getRecipient(),
+                    savedNotification.getType(),
+                    savedNotification.getStatus());
+
+            return toDto(savedNotification);
+
+        } catch (Exception ex) {
+            logger.error("Error inesperado al crear notificación. recipient={}, type={}. Motivo={}",
+                    dto.getRecipient(),
+                    dto.getType(),
+                    ex.getMessage(),
+                    ex);
+
+            throw ex;
         }
-
-        return toDto(repository.save(notification));
     }
 
     @Override
     public NotificationResponseDto update(NotificationRequestDto dto) {
-        if (dto.getId() == null) {
-            return null;
-        }
+        logger.info("Iniciando actualización de notificación. notificationId={}, recipient={}, type={}",
+                dto.getId(),
+                dto.getRecipient(),
+                dto.getType());
 
-        if (findById(dto.getId()) == null) {
-            return null;
-        }
+        try {
+            if (dto.getId() == null) {
+                logger.warn("No se pudo actualizar notificación. El id viene nulo");
+                return null;
+            }
 
-        return toDto(repository.save(toEntity(dto)));
+            if (findById(dto.getId()) == null) {
+                logger.warn("No se pudo actualizar notificación. Notificación no encontrada. notificationId={}",
+                        dto.getId());
+                return null;
+            }
+
+            Notification savedNotification = repository.save(toEntity(dto));
+
+            logger.info("Notificación actualizada correctamente. notificationId={}, recipient={}, type={}, status={}",
+                    savedNotification.getId(),
+                    savedNotification.getRecipient(),
+                    savedNotification.getType(),
+                    savedNotification.getStatus());
+
+            return toDto(savedNotification);
+
+        } catch (Exception ex) {
+            logger.error("Error inesperado al actualizar notificación. notificationId={}. Motivo={}",
+                    dto.getId(),
+                    ex.getMessage(),
+                    ex);
+
+            throw ex;
+        }
     }
 
     @Override
     public NotificationResponseDto updateStatus(Long id, String status) {
-        Notification notification = repository.findById(id).orElse(null);
+        logger.info("Actualizando estado de notificación. notificationId={}, nuevoStatus={}", id, status);
 
-        if (notification == null) {
-            return null;
+        try {
+            Notification notification = repository.findById(id).orElse(null);
+
+            if (notification == null) {
+                logger.warn("No se pudo actualizar estado. Notificación no encontrada. notificationId={}", id);
+                return null;
+            }
+
+            String previousStatus = notification.getStatus();
+
+            notification.setStatus(status);
+
+            Notification savedNotification = repository.save(notification);
+
+            logger.info("Estado de notificación actualizado correctamente. notificationId={}, estadoAnterior={}, nuevoEstado={}",
+                    savedNotification.getId(),
+                    previousStatus,
+                    savedNotification.getStatus());
+
+            return toDto(savedNotification);
+
+        } catch (Exception ex) {
+            logger.error("Error inesperado al actualizar estado de notificación. notificationId={}, nuevoStatus={}. Motivo={}",
+                    id,
+                    status,
+                    ex.getMessage(),
+                    ex);
+
+            throw ex;
         }
-
-        notification.setStatus(status);
-
-        return toDto(repository.save(notification));
     }
 
     @Override
     public boolean delete(Long id) {
+        logger.info("Intentando eliminar notificación. notificationId={}", id);
+
         if (findById(id) == null) {
+            logger.warn("No se pudo eliminar notificación. Notificación no encontrada. notificationId={}", id);
             return false;
         }
 
         repository.deleteById(id);
+
+        logger.info("Notificación eliminada correctamente. notificationId={}", id);
+
         return true;
     }
 }

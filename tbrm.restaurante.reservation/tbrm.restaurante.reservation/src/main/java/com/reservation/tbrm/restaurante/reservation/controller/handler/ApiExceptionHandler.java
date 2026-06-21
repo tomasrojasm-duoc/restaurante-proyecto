@@ -2,7 +2,8 @@ package com.reservation.tbrm.restaurante.reservation.controller.handler;
 
 import com.reservation.tbrm.restaurante.reservation.dto.ExceptionDto;
 import feign.RetryableException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
-@Slf4j
 public class ApiExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<ExceptionDto>> handleMethodArgumentNotValidException(
@@ -28,6 +30,8 @@ public class ApiExceptionHandler {
             errors.add(new ExceptionDto(fieldName, errorMessage));
         });
 
+        logger.warn("Error de validación en reservation-. totalErrores={}", errors.size());
+
         return ResponseEntity.badRequest().body(errors);
     }
 
@@ -38,7 +42,9 @@ public class ApiExceptionHandler {
         error.setMessage("Error comunicando con otra API");
         error.setDescription("Una de las APIs que necesitamos, está abajo. Súbela y vuelve a intentar.");
 
-        log.error(ex.getMessage());
+        logger.error("Error de comunicación con otro microservicio desde reservation. Motivo={}",
+                ex.getMessage(),
+                ex);
 
         return ResponseEntity.internalServerError().body(error);
     }
@@ -49,6 +55,10 @@ public class ApiExceptionHandler {
 
         error.setMessage("Ocurrió un error");
         error.setDescription(ex.getMessage());
+
+        logger.error("Error general capturado en ApiExceptionHandler de reservation. Motivo={}",
+                ex.getMessage(),
+                ex);
 
         return ResponseEntity.badRequest().body(error);
     }

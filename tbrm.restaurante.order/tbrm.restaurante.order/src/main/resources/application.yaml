@@ -1,0 +1,31 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: order
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/order_db
+    username: root
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
+logging:
+  file:
+    name: ${LOG_PATH:logs}/order-service.log
+
+  level:
+    root: INFO
+    com.order.tbrm.restaurante.order: DEBUG
+
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
+    console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"

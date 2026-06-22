@@ -1,4 +1,5 @@
-package com.waiter.tbrm.restaurante.waiter.config;
+package com.menu.tbrm.restaurante.menu.config;
+
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -9,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI waiterServiceOpenAPI() {
+    public OpenAPI menuServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Waiter API")
-                        .description("Documentación de endpoints para la gestión de garzones del restaurante.")
+                        .title("Menu API")
+                        .description("Documentación de endpoints para la gestión de productos del menú.")
                         .version("1.0.0"));
     }
 }

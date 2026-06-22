@@ -1,4 +1,4 @@
-package com.order.tbrm.restaurante.order.config;
+package com.diner.tbrm.restaurante.diner;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI orderServiceOpenAPI() {
+    public OpenAPI dinerServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Order API")
-                        .description("Documentación de endpoints para la gestión de pedidos del restaurante.")
+                        .title("Diner API")
+                        .description("Documentación de endpoints para la gestión de comensales del restaurante.")
                         .version("1.0.0"));
     }
 }

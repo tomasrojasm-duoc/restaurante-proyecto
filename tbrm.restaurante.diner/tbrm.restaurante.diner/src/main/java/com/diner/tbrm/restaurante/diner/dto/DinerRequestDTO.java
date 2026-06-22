@@ -6,8 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -27,5 +26,5 @@ public class DinerRequestDTO {
     @Email
     String email;
     @NotNull
-    Date birthday;
+    LocalDate birthday;
 }

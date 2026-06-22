@@ -1,3 +1,24 @@
+
+server:
+  port: 8086
+
+spring:
+  application:
+    name: menu-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/menu_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
 logging:
   file:
     name: ${LOG_PATH:logs}/menu.log
@@ -9,3 +30,14 @@ logging:
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
     console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+  spring doc:
+    api-docs:
+      path: /v3/api-docs
+
+    swagger-ui:
+      path: /swagger-ui.html
+      operations-sorter: method
+      tags-sorter: alpha
+
+    show-actuator: true

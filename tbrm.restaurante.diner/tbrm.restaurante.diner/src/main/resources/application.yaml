@@ -1,3 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: diner-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/diner_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
 logging:
   file:
     name: ${LOG_PATH:logs}/diner.log
@@ -10,7 +30,7 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
     console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"
 
-  springdoc:
+  spring doc:
     api-docs:
       path: /v3/api-docs
 
@@ -18,3 +38,5 @@ logging:
       path: /swagger-ui.html
       operations-sorter: method
       tags-sorter: alpha
+
+    show-actuator: true

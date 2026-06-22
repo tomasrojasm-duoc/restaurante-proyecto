@@ -1,4 +1,4 @@
-package com.diner.tbrm.restaurante.diner;
+package com.diner.tbrm.restaurante.diner.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

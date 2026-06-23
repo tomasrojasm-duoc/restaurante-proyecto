@@ -23,6 +23,7 @@ public class OrderDetail {
     @Column(name = "unit_price")
     private Integer unitPrice;
     private Integer subtotal;
-    @ManyToOne @JoinColumn(name = "order_id")
+    @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;
 }

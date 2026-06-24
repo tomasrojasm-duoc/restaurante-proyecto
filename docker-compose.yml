@@ -358,6 +358,8 @@ services:
       - restaurant-network
 
   api-gateway:
+    build:
+      context: ./restaurante/restaurante
     image: api-gateway:latest
     container_name: api-gateway
     restart: always

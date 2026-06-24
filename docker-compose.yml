@@ -180,6 +180,8 @@ services:
       - restaurant-network
 
   diner-service:
+    build:
+      context: ./tbrm.restaurante.diner/tbrm.restaurante.diner
     image: diner-service:latest
     container_name: diner-service
     restart: always
@@ -197,6 +199,8 @@ services:
       - restaurant-network
 
   reservation-service:
+    build:
+      context: ./tbrm.restaurante.reservation/tbrm.restaurante.reservation
     image: reservation-service:latest
     container_name: reservation-service
     restart: always
@@ -218,6 +222,8 @@ services:
       - restaurant-network
 
   table-service:
+    build:
+      context: ./tbrm.restaurante.table
     image: table-service:latest
     container_name: table-service
     restart: always
@@ -235,6 +241,8 @@ services:
       - restaurant-network
 
   auth-service:
+    build:
+      context: ./tbrm.restaurante.auth
     image: auth-service:latest
     container_name: auth-service
     restart: always
@@ -246,6 +254,8 @@ services:
       - restaurant-network
 
   waiter-service:
+    build:
+      context: ./tbrm.restaurante.waiter
     image: waiter-service:latest
     container_name: waiter-service
     restart: always
@@ -263,6 +273,8 @@ services:
       - restaurant-network
 
   menu-service:
+    build:
+      context: ./tbrm.restaurante.menu/tbrm.restaurante.menu
     image: menu-service:latest
     container_name: menu-service
     restart: always
@@ -280,6 +292,8 @@ services:
       - restaurant-network
 
   order-service:
+    build:
+      context: ./tbrm.restaurante.order/tbrm.restaurante.order
     image: order-service:latest
     container_name: order-service
     restart: always
@@ -305,6 +319,8 @@ services:
       - restaurant-network
 
   kitchen-service:
+    build:
+      context: ./tbrm.restaurante.kitchen
     image: kitchen-service:latest
     container_name: kitchen-service
     restart: always
@@ -324,6 +340,8 @@ services:
       - restaurant-network
 
   inventory-service:
+    build:
+      context: ./tbrm.restaurante.inventory
     image: inventory-service:latest
     container_name: inventory-service
     restart: always
@@ -341,6 +359,8 @@ services:
       - restaurant-network
 
   notification-service:
+    build:
+      context: ./tbrm.restaurante.notification
     image: notification-service:latest
     container_name: notification-service
     restart: always

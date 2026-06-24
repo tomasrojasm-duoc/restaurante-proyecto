@@ -129,7 +129,6 @@
 							</annotationProcessorPaths>
 						</configuration>
 					</execution>
-
 					<execution>
 						<id>default-testCompile</id>
 						<phase>test-compile</phase>

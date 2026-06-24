@@ -1,0 +1,43 @@
+services:
+  mysql-waiter-db:
+    image: mysql:8.0
+    container_name: mysql-waiter-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: waiter_db
+    ports:
+      - "3310:3306"
+    volumes:
+      - waiter_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  waiter-service:
+    image: waiter-service:latest
+    container_name: waiter-service
+    restart: always
+    depends_on:
+      mysql-waiter-db:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-waiter-db:3306/waiter_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+volumes:
+  waiter_db_data:
+
+networks:
+  restaurant-network:
+    driver: bridge

@@ -1,0 +1,15 @@
+services:
+  auth-service:
+    image: auth-service:latest
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+    networks:
+      - restaurant-network
+
+networks:
+  restaurant-network:
+    driver: bridge

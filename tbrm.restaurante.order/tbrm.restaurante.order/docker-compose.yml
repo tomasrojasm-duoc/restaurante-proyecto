@@ -1,0 +1,44 @@
+services:
+  mysql-order-db:
+    image: mysql:8.0
+    container_name: mysql-order-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+    ports:
+      - "3315:3306"
+    volumes:
+      - order_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  order-service:
+    image: order-service:latest
+    container_name: order-service
+    restart: always
+    depends_on:
+      mysql-order-db:
+        condition: service_healthy
+    ports:
+      - "8087:8087"
+    environment:
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order-db:3306/order_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+volumes:
+  order_db_data:
+
+networks:
+  restaurant-network:
+    driver: bridge

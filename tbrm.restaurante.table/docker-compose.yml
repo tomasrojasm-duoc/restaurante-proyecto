@@ -10,6 +10,12 @@ services:
       - "3308:3306"
     volumes:
       - table_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - restaurant-network
 
@@ -18,7 +24,8 @@ services:
     container_name: table-service
     restart: always
     depends_on:
-      - mysql-table-db
+      mysql-table-db:
+        condition: service_healthy
     ports:
       - "8083:8083"
     environment:
@@ -33,3 +40,4 @@ volumes:
 
 networks:
   restaurant-network:
+    driver: bridge

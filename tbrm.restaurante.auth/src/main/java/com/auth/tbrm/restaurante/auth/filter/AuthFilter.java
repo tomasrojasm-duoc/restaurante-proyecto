@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 public class AuthFilter extends OncePerRequestFilter {
@@ -22,6 +21,16 @@ public class AuthFilter extends OncePerRequestFilter {
     public AuthFilter(AuthService service, UserDetailsService userDetailsService) {
         this.service = service;
         this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        return path.startsWith("/api/v1/auth")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs");
     }
 
     @Override

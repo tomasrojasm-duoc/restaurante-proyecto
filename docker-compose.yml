@@ -1,0 +1,405 @@
+services:
+  mysql-diner-db:
+    image: mysql:8.0
+    container_name: mysql-diner-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: diner_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - diner_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-reservation-db:
+    image: mysql:8.0
+    container_name: mysql-reservation-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: reservation_db
+    ports:
+      - "3314:3306"
+    volumes:
+      - reservation_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-table-db:
+    image: mysql:8.0
+    container_name: mysql-table-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: table_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - table_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-waiter-db:
+    image: mysql:8.0
+    container_name: mysql-waiter-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: waiter_db
+    ports:
+      - "3310:3306"
+    volumes:
+      - waiter_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-menu-db:
+    image: mysql:8.0
+    container_name: mysql-menu-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: menu_db
+    ports:
+      - "3311:3306"
+    volumes:
+      - menu_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-order-db:
+    image: mysql:8.0
+    container_name: mysql-order-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+    ports:
+      - "3315:3306"
+    volumes:
+      - order_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-kitchen-db:
+    image: mysql:8.0
+    container_name: mysql-kitchen-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kitchen_db
+    ports:
+      - "3316:3306"
+    volumes:
+      - kitchen_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-inventory-db:
+    image: mysql:8.0
+    container_name: mysql-inventory-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory_db
+    ports:
+      - "3312:3306"
+    volumes:
+      - inventory_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  mysql-notification-db:
+    image: mysql:8.0
+    container_name: mysql-notification-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notification_db
+    ports:
+      - "3313:3306"
+    volumes:
+      - notification_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurant-network
+
+  diner-service:
+    image: diner-service:latest
+    container_name: diner-service
+    restart: always
+    depends_on:
+      mysql-diner-db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-diner-db:3306/diner_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  reservation-service:
+    image: reservation-service:latest
+    container_name: reservation-service
+    restart: always
+    depends_on:
+      mysql-reservation-db:
+        condition: service_healthy
+      diner-service:
+        condition: service_started
+      table-service:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-reservation-db:3306/reservation_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  table-service:
+    image: table-service:latest
+    container_name: table-service
+    restart: always
+    depends_on:
+      mysql-table-db:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-table-db:3306/table_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  auth-service:
+    image: auth-service:latest
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+    networks:
+      - restaurant-network
+
+  waiter-service:
+    image: waiter-service:latest
+    container_name: waiter-service
+    restart: always
+    depends_on:
+      mysql-waiter-db:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-waiter-db:3306/waiter_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  menu-service:
+    image: menu-service:latest
+    container_name: menu-service
+    restart: always
+    depends_on:
+      mysql-menu-db:
+        condition: service_healthy
+    ports:
+      - "8086:8086"
+    environment:
+      SERVER_PORT: 8086
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-menu-db:3306/menu_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  order-service:
+    image: order-service:latest
+    container_name: order-service
+    restart: always
+    depends_on:
+      mysql-order-db:
+        condition: service_healthy
+      diner-service:
+        condition: service_started
+      table-service:
+        condition: service_started
+      waiter-service:
+        condition: service_started
+      menu-service:
+        condition: service_started
+    ports:
+      - "8087:8087"
+    environment:
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order-db:3306/order_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  kitchen-service:
+    image: kitchen-service:latest
+    container_name: kitchen-service
+    restart: always
+    depends_on:
+      mysql-kitchen-db:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+    ports:
+      - "8088:8088"
+    environment:
+      SERVER_PORT: 8088
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-kitchen-db:3306/kitchen_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  inventory-service:
+    image: inventory-service:latest
+    container_name: inventory-service
+    restart: always
+    depends_on:
+      mysql-inventory-db:
+        condition: service_healthy
+    ports:
+      - "8089:8089"
+    environment:
+      SERVER_PORT: 8089
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-inventory-db:3306/inventory_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  notification-service:
+    image: notification-service:latest
+    container_name: notification-service
+    restart: always
+    depends_on:
+      mysql-notification-db:
+        condition: service_healthy
+    ports:
+      - "8090:8090"
+    environment:
+      SERVER_PORT: 8090
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notification-db:3306/notification_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - restaurant-network
+
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      diner-service:
+        condition: service_started
+      reservation-service:
+        condition: service_started
+      table-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      waiter-service:
+        condition: service_started
+      menu-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      kitchen-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+    networks:
+      - restaurant-network
+
+volumes:
+  diner_db_data:
+  reservation_db_data:
+  table_db_data:
+  waiter_db_data:
+  menu_db_data:
+  order_db_data:
+  kitchen_db_data:
+  inventory_db_data:
+  notification_db_data:
+
+networks:
+  restaurant-network:
+    driver: bridge
